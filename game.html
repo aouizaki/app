@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Roles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('th.jpg');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: -10px;
+            width: auto;
+            min-height: 79vh;
+            text-align: center;
+            padding: 50px;
+        }
+        h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .btn-next {
+            background-color: #050049;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-next:hover {
+            background-color: #45a049;
+        }
+        .role-container {
+            margin-bottom: 30px;
+        }
+        .all {
+            display: block;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            box-sizing: border-box;
+            background: rgb(72, 62, 255);
+            padding: 50px 70px;
+            border-radius: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+
+        /* Feedback message style */
+        #clickFeedback {
+            display: none;
+            font-size: 1.2em;
+            color: green;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="all">
+        <div class="role-container">
+            <h3 id="roleName">Press Next to get a role</h3>
+        </div>
+        <button class="btn-next" id="nextButton">Next</button>
+
+        <!-- Feedback message -->
+        <div id="clickFeedback">Role assigned!</div>
+    </div>
+
+    <script>
+        // Get the query parameters from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleData = {};
+
+        // Store the roles and their counts from the query string
+        urlParams.forEach((value, key) => {
+            roleData[key] = parseInt(value, 10);
+        });
+
+        const roles = Object.keys(roleData);
+        let allRoles = [];
+
+        // Generate the list of roles based on the user input
+        roles.forEach(role => {
+            const count = roleData[role];
+            for (let i = 0; i < count; i++) {
+                allRoles.push(role);
+            }
+        });
+
+        // Shuffle function to randomize the role assignment
+        function shuffleRoles(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Initialize shuffled roles
+        let shuffledRoles = shuffleRoles([...allRoles]);
+
+        // Track the last assigned role
+        let lastAssignedRole = null;
+
+        // Function to display the next role
+        let currentRoleIndex = 0;
+
+        function showNextRole() {
+            if (currentRoleIndex < shuffledRoles.length) {
+                let nextRole = shuffledRoles[currentRoleIndex];
+
+                // Check if the last role was "loup" and exclude it from the next selection
+                if (lastAssignedRole === 'loup' && nextRole === 'loup') {
+                    // Skip "loup" if it was assigned last time
+                    currentRoleIndex++;
+                    nextRole = shuffledRoles[currentRoleIndex];
+                }
+
+                document.getElementById('roleName').innerText = nextRole;
+                lastAssignedRole = nextRole; // Update the last assigned role
+                currentRoleIndex++;
+
+                // Show feedback message that the role has been assigned
+                const feedback = document.getElementById('clickFeedback');
+                feedback.style.display = 'block'; // Show the feedback message
+
+                // Hide the feedback message after 1 second
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 1000); // Hide after 1000ms (1 second)
+            } else {
+                document.getElementById('roleName').innerText = "All roles have been assigned!";
+                document.getElementById('nextButton').disabled = true;
+                document.getElementById('nextButton').innerText = "Game Over";
+            }
+        }
+
+        document.getElementById('nextButton').addEventListener('click', showNextRole);
+        showNextRole(); // Show the first role when the page loads
+
+    </script>
+</body>
+</html>
